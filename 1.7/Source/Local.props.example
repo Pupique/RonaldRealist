@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <!-- Directory that contains Assembly-CSharp.dll (and UnityStubs / Waylith). -->
+    <!-- Linux Steam (classic): .../RimWorld/RimWorldLinux_Data/Managed -->
+    <!-- Windows Steam (classic): .../RimWorld/RimWorldWin64_Data/Managed -->
+    <!-- Some installs place managed assemblies at the RimWorld game root instead. -->
+    <RimWorldManagedDir>/path/to/RimWorld/Managed</RimWorldManagedDir>
+
+    <!-- Optional: parent Mods directory. When set, the build copies assemblies to $(RimWorldModsDir)/RonaldRealist/<version>/Assemblies. -->
+    <!-- If omitted, the project derives the install path from RimWorldManagedDir. -->
+    <!-- Full Mod/ trees are deployed by repo-root deploy.sh (paths.env), not by the C# build. -->
+    <!-- <RimWorldModsDir>/path/to/RimWorld/Mods</RimWorldModsDir> -->
+
+    <!-- Optional: full path to the installed mod folder (overrides RimWorldModsDir derivation). -->
+    <!-- <RimWorldModInstallDir>/path/to/RimWorld/Mods/RonaldRealist</RimWorldModInstallDir> -->
+  </PropertyGroup>
+</Project>

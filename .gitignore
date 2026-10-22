@@ -1,0 +1,9 @@
+bin/
+obj/
+tmp/
+ref/
+
+*.props
+*.dll
+*.env
+*.ods#

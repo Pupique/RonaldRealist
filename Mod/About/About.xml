@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Ronald Realist</name>
+  <author>Pupique</author>
+  <packageId>Pupique.RonaldRealist</packageId>
+  <url>https://github.com/Pupique/RonaldRealist</url>
+  <description>
+A different type of RimWorld storyteller whose main premise is an event frequency revamp based on geographical, environmental, and colonial (wealth and population) factors.
+
+An overall revamp of storytellers is not this mod's purpose and is not included in its scope.
+
+Feel free to visit and even fork the repository:
+https://github.com/Pupique/RonaldRealist
+
+Thanks!
+  </description>
+
+  <supportedVersions>
+    <li>1.7</li>
+  </supportedVersions>
+
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+      <steamWorkshopUrl>
+        https://steamcommunity.com/sharedfiles/filedetails/?id=2009463077
+      </steamWorkshopUrl>
+    </li>
+  </modDependencies>
+</ModMetaData>

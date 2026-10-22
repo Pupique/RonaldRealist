@@ -1,0 +1,114 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="Local.props" Condition="Exists('Local.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <DebugType>embedded</DebugType>
+    <AssemblyName>RonaldRealist</AssemblyName>
+    <Product>RonaldRealist</Product>
+    <RootNamespace>RonaldRealist</RootNamespace>
+    <Version>1.0.0.0</Version>
+    <!-- RimWorld major.minor this project targets; drives OutputPath and live-install assembly deploy. -->
+    <RimWorldGameVersion>1.7</RimWorldGameVersion>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <!-- <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies> -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>../../Mod/$(RimWorldGameVersion)/Assemblies/</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputPath>../../Mod/$(RimWorldGameVersion)/Assemblies/</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <!--
+    Live-install assembly destination: Mods/RonaldRealist/<version>/Assemblies.
+    Resolution order for the mod install root:
+      1. RimWorldModInstallDir (full path to the RonaldRealist folder), if set
+      2. RimWorldModsDir/RonaldRealist, if RimWorldModsDir is set
+      3. RimWorldManagedDir/Mods/RonaldRealist when ManagedDir is the game root
+      4. RimWorldManagedDir/../../Mods/RonaldRealist (standard .../*_Data/Managed layout)
+    Full Mod/ trees are deployed by repo-root deploy.sh, not by this target.
+  -->
+  <PropertyGroup>
+    <RimWorldModInstallDir
+      Condition="'$(RimWorldModInstallDir)' == '' and '$(RimWorldModsDir)' != ''">$(RimWorldModsDir)/RonaldRealist</RimWorldModInstallDir>
+    <RimWorldModInstallDir
+      Condition="'$(RimWorldModInstallDir)' == '' and Exists('$(RimWorldManagedDir)/Mods')">$(RimWorldManagedDir)/Mods/RonaldRealist</RimWorldModInstallDir>
+    <RimWorldModInstallDir
+      Condition="'$(RimWorldModInstallDir)' == '' and '$(RimWorldManagedDir)' != ''">$(RimWorldManagedDir)/../../Mods/RonaldRealist</RimWorldModInstallDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony.Ref" Version="3.0.0-rc.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RimWorldManagedDir)/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityStubs">
+      <HintPath>$(RimWorldManagedDir)/UnityStubs.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="Waylith">
+      <HintPath>$(RimWorldManagedDir)/Waylith.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="ValidateLocalConfiguration"
+    BeforeTargets="ResolveReferences">
+
+    <Error
+      Condition="'$(RimWorldManagedDir)' == ''"
+      Text="Configure RimWorldManagedDir in Local.props." />
+
+    <Error
+      Condition="!Exists('$(RimWorldManagedDir)/Assembly-CSharp.dll')"
+      Text="Assembly-CSharp.dll was not found at the configured path ($(RimWorldManagedDir)/Assembly-CSharp.dll)." />
+  </Target>
+
+  <!-- Copy built assemblies into the live RimWorld mod install (assemblies only). -->
+  <Target Name="DeployAssembliesToRimWorldMods" AfterTargets="Build">
+    <Error
+      Condition="'$(RimWorldModInstallDir)' == ''"
+      Text="Could not resolve RimWorldModInstallDir. Set RimWorldModsDir or RimWorldModInstallDir in Local.props, or ensure RimWorldManagedDir is set." />
+
+    <PropertyGroup>
+      <_NormalizedInstallDir>$([System.IO.Path]::GetFullPath('$(RimWorldModInstallDir)'))</_NormalizedInstallDir>
+      <_InstallAssembliesDir>$(_NormalizedInstallDir)/$(RimWorldGameVersion)/Assemblies</_InstallAssembliesDir>
+    </PropertyGroup>
+
+    <Error
+      Condition="!$(_NormalizedInstallDir.EndsWith('RonaldRealist')) and !$(_NormalizedInstallDir.EndsWith('RonaldRealist/')) and !$(_NormalizedInstallDir.EndsWith('RonaldRealist\'))"
+      Text="Refusing to deploy: install dir must end with RonaldRealist (got $(_NormalizedInstallDir))." />
+
+    <Warning
+      Condition="!Exists('$(_NormalizedInstallDir)/About/About.xml')"
+      Text="Live mod install looks incomplete (missing About/About.xml at $(_NormalizedInstallDir)). Run ./deploy.sh from the repo root for a full Mod/ mirror, then rebuild if needed." />
+
+    <MakeDir Directories="$(_InstallAssembliesDir)" />
+
+    <ItemGroup>
+      <_BuiltAssemblies Include="$(TargetDir)*.dll" />
+    </ItemGroup>
+
+    <Message
+      Importance="high"
+      Text="[Ronald Realist] Copying assemblies -&gt; $(_InstallAssembliesDir)" />
+
+    <Copy
+      SourceFiles="@(_BuiltAssemblies)"
+      DestinationFolder="$(_InstallAssembliesDir)"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
